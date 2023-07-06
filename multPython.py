@@ -1,35 +1,53 @@
 import threading
-import timeit
+from time import time
 
-N = 2048
-threads = 4
+N = 512 # Tamaño de las matrices
+threads = 2 # Cantidad de hilos
+
+# Declaracion de las matrices
 A = [1 for x in range(N*N)]  
-B = [2 for x in range(N*N)] 
+B = [1 for x in range(N*N)] 
 C = [0 for x in range(N*N)]
 
-def mult(id):
-    desde = int((N/threads)*id)
-    hasta = int(desde + (N/threads))
-    for i in range(desde,hasta):
+def printArray(arr):        
+    print('{', end='')
+    for i in range (N):
+        if (i>0):
+            print()
+        for j in range (N):
+            print('['+str(arr [i*N+j])+']', end='')
+    print('}')
+
+# Funcion que resuelve la multiplicacion
+def mult(desde, hasta):
+    for i in range(desde, hasta):
         posi = i * N
         for j in range(N):
             posj = j * N
-            mult=0
+            mult = 0
             for k in range(N):
                 mult += A[posi + k] * B[posj + k]
             C[posi + j] = mult
 
 thr = []
+
+# Creacion de hilos
 for i in range(threads):
-    thr.append(threading.Thread(target=mult, args=[i]))
+    desde = int((N / threads) * i)
+    hasta = int(desde + (N / threads))
+    thr.append(threading.Thread(target=mult, args=(desde, hasta)))
 
-start = timeit.default_timer()
+start = time()
 
+# Inician los hilos
 for i in range(threads):
     thr[i].start()
 
+# Se espera a que terminen todos los hilos
 for i in range(threads):
     thr[i].join()
 
-stop = timeit.default_timer()
-print( stop - start) 
+stop = time()
+
+# Muestra el tiempo de ejecución
+print("Tiempo de ejecución:", stop - start) 
